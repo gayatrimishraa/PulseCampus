@@ -122,8 +122,6 @@ export default function RegisterScreen() {
         createdAt: serverTimestamp(),
       });
 
-      console.log('Firestore student profile created:', user.uid);
-
       router.replace('/(tabs)');
     } catch (err: any) {
       console.error('Registration/profile creation error:', err);

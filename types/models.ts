@@ -1,4 +1,3 @@
-
 import type { Timestamp } from 'firebase/firestore';
 
 // ==========================================
@@ -6,10 +5,6 @@ import type { Timestamp } from 'firebase/firestore';
 // ==========================================
 
 export type UserRole = 'student' | 'moderator' | 'admin';
-export interface PollOptionResult {
-  optionId: string;
-  count: number;
-}
 
 export interface UserProfile {
   uid: string;
@@ -112,10 +107,6 @@ export interface PollOptionResult {
   count: number;
 }
 
-export interface PollOptionResult {
-  optionId: string;
-  count: number;
-}
 // ==========================================
 // NOTIFICATIONS
 // ==========================================

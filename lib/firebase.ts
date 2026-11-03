@@ -1,3 +1,4 @@
+
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import * as FirebaseAuth from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -22,47 +23,37 @@ const missingConfig = Object.entries(firebaseConfig)
   .map(([key]) => key);
 
 if (missingConfig.length > 0) {
-  throw new Error(`Missing Firebase environment variables: ${missingConfig.join(', ')}`);
+  throw new Error(
+    `Missing Firebase environment variables: ${missingConfig.join(', ')}`
+  );
 }
 
 const appAlreadyExisted = getApps().length > 0;
 const app = appAlreadyExisted ? getApp() : initializeApp(firebaseConfig);
-console.log('CHECK 1: Firebase app initialized, pre-existing:', appAlreadyExisted);
 
 let auth: FirebaseAuth.Auth;
 
-if (appAlreadyExisted) {
+if (Platform.OS === 'web') {
   auth = FirebaseAuth.getAuth(app);
-  console.log('CHECK 2-4: Reusing existing Auth instance');
+} else if (appAlreadyExisted) {
+  auth = FirebaseAuth.getAuth(app);
 } else {
-  console.log('CHECK 2: Starting Auth initialization');
+  const getReactNativePersistence = (
+    FirebaseAuth as typeof FirebaseAuth & {
+      getReactNativePersistence: (
+        storage: AuthPersistence
+      ) => AuthDependencies['persistence'];
+    }
+  ).getReactNativePersistence;
 
-  if (Platform.OS !== 'web') {
-    const AsyncStorage =
-      require('@react-native-async-storage/async-storage').default;
+  const AsyncStorage =
+    require('@react-native-async-storage/async-storage').default;
 
-    const getReactNativePersistence = (
-      FirebaseAuth as typeof FirebaseAuth & {
-        getReactNativePersistence: (storage: typeof AsyncStorage) => AuthPersistence;
-      }
-    ).getReactNativePersistence;
-
-    console.log('CHECK 2a: getReactNativePersistence type:', typeof getReactNativePersistence);
-
-    const persistence = getReactNativePersistence(AsyncStorage);
-    console.log('CHECK 3: Persistence created');
-
-    auth = FirebaseAuth.initializeAuth(app, { persistence });
-    console.log('CHECK 4: Auth initialized with RN persistence');
-
-  } else {
-    console.log('CHECK 3 (web): Using default auth');
-    auth = FirebaseAuth.initializeAuth(app);
-    console.log('CHECK 4 (web): Auth initialized');
-  }
+  auth = FirebaseAuth.initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
 }
 
 const db = getFirestore(app);
-console.log('CHECK 5: Firestore initialized');
 
 export { app, auth, db };
