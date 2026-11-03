@@ -39,3 +39,13 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Environment configuration
+.env
+.env.*
+!.env.example
+
+# Firebase private credentials
+serviceAccountKey.json
+service-account.json
+firebase-adminsdk*.json
